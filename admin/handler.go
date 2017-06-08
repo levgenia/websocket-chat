@@ -3,6 +3,8 @@ package admin
 import (
 	"github.com/levgenia/websocket-chat/chat"
 	"fmt"
+	"bufio"
+	"os"
 )
 
 type admin struct {
@@ -12,6 +14,14 @@ type admin struct {
 func NewAdmin(clients *chat.Clients) *admin {
 	return &admin{
 		clients: clients,
+	}
+}
+
+func (a *admin) ListenConsole(){
+	scanner := bufio.NewScanner(os.Stdin)
+	for scanner.Scan() {
+		out := a.Handle(scanner.Text())
+		os.Stdout.Write([]byte(out))
 	}
 }
 

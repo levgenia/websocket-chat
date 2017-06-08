@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"log"
+	"fmt"
 )
 
 func ChatHandler(clients *Clients) http.HandlerFunc {
@@ -17,27 +18,31 @@ func ChatHandler(clients *Clients) http.HandlerFunc {
 			return
 		}
 		client := ws.RemoteAddr()
-		sockCli := NewConnection(ws, client)
+		clientConn := NewConnection(ws, client)
 
 		for {
 			messageType, p, err := ws.ReadMessage()
 			if err != nil {
-				log.Println("failed to read meddage", client.String(), err)
-				clients.DeleteConnection(sockCli)
+				log.Println("failed to read message", client.String(), err)
+				clients.DeleteConnection(clientConn)
 				return
 			}
 
-			if !clients.ExistConnection(sockCli) {
+			if !clients.ExistConnection(clientConn) {
 				if IsStartMessage(p) {
-					clients.AddConnection(sockCli)
-					sockCli.SendMessage(messageType, []byte("hello, you're in chat! type '/stop' to stop chatting"))
+					str := fmt.Sprint(clientConn.address.String(), " joined to the chat")
+					clients.BroadcastMessage(messageType,[]byte(str))
+					clients.AddConnection(clientConn)
+					clientConn.SendMessage(messageType, []byte("hello, you're in chat! type '/stop' to stop chatting"))
 				} else {
-					sockCli.SendError(messageType, []byte("type '/start' to start chatting"))
+					clientConn.SendError(messageType, []byte("type '/start' to start chatting"))
 				}
 			} else {
 				if IsStopMessage(p) {
-					clients.DeleteConnection(sockCli)
-					sockCli.SendMessage(messageType, []byte("bye-bye"))
+					clients.DeleteConnection(clientConn)
+					clientConn.SendMessage(messageType, []byte("bye-bye! I'll miss u :("))
+					str := fmt.Sprint(clientConn.address.String(), " left the chat")
+					clients.BroadcastMessage(messageType,[]byte(str))
 				} else {
 					clients.BroadcastMessage(messageType, p)
 				}
