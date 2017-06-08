@@ -8,24 +8,30 @@ import (
 	"log"
 	"github.com/levgenia/websocket-chat/admin"
 	"strconv"
+	"flag"
 )
 
-const (
-	portNum = 3000
+var (
+	address string
+	port int
 )
 
 func init() {
-	os.Setenv("PORT", strconv.Itoa(portNum))
+	flag.StringVar(&address, "address", "localhost", "host address")
+	flag.IntVar(&port, "port", 3000, "host port")
 }
 
 func main() {
-	m := martini.Classic()
+	flag.Parse()
+	os.Setenv("PORT", strconv.Itoa(port))
 
-	f, err := os.OpenFile("logfile", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	f, err := os.OpenFile("logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return
 	}
 	defer f.Close()
+
+	m := martini.Classic()
 
 	logger := log.New(f, "", 1)
 	m.Logger(logger)
@@ -34,7 +40,7 @@ func main() {
 		return `<html><body><script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
     <ul id=messages></ul><form><input id=message><input type="submit" id=send value=Send></form>
     <script>
-    var c=new WebSocket('ws://localhost:` + strconv.Itoa(portNum) + `/sock');
+    var c=new WebSocket('ws://` + address + `:` + strconv.Itoa(port) + `/sock');
     c.onopen = function(){
       c.onmessage = function(response){
         console.log(response.data);
