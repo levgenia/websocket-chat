@@ -1,23 +1,20 @@
 package main
 
 import (
-	"github.com/codegangsta/martini"
-	"github.com/levgenia/websocket-chat/chat"
-	"bufio"
-	"os"
-	"log"
-	"github.com/levgenia/websocket-chat/admin"
-	"strconv"
 	"flag"
+	"github.com/codegangsta/martini"
+	"github.com/levgenia/websocket-chat/admin"
+	"github.com/levgenia/websocket-chat/chat"
+	"log"
+	"os"
+	"strconv"
 )
 
 var (
-	address string
-	port int
+	port    int
 )
 
 func init() {
-	flag.StringVar(&address, "address", "localhost", "host address")
 	flag.IntVar(&port, "port", 3000, "host port")
 }
 
@@ -26,6 +23,7 @@ func main() {
 	os.Setenv("PORT", strconv.Itoa(port))
 
 	f, err := os.OpenFile("logfile", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+
 	if err != nil {
 		return
 	}
@@ -38,9 +36,11 @@ func main() {
 
 	m.Get("/", func() string {
 		return `<html><body><script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
-    <ul id=messages></ul><form><input id=message><input type="submit" id=send value=Send></form>
+    <ul id=messages></ul>
+    <form> <input id=message><input type="submit" id=send value=Send></form>
     <script>
-    var c=new WebSocket('ws://` + address + `:` + strconv.Itoa(port) + `/sock');
+    var addr = 'ws://' + window.location.host + '/sock'
+    var c=new WebSocket(addr);
     c.onopen = function(){
       c.onmessage = function(response){
         console.log(response.data);
@@ -63,9 +63,6 @@ func main() {
 
 	go m.Run()
 
-	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		out := admin.Handle(scanner.Text())
-		os.Stdout.Write([]byte(out))
-	}
+	admin.ListenConsole()
+
 }

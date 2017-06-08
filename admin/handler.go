@@ -1,9 +1,9 @@
 package admin
 
 import (
-	"github.com/levgenia/websocket-chat/chat"
-	"fmt"
 	"bufio"
+	"fmt"
+	"github.com/levgenia/websocket-chat/chat"
 	"os"
 )
 
@@ -17,7 +17,7 @@ func NewAdmin(clients *chat.Clients) *admin {
 	}
 }
 
-func (a *admin) ListenConsole(){
+func (a *admin) ListenConsole() {
 	scanner := bufio.NewScanner(os.Stdin)
 	for scanner.Scan() {
 		out := a.Handle(scanner.Text())

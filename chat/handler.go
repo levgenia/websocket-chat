@@ -1,10 +1,10 @@
 package chat
 
 import (
-	"net/http"
+	"fmt"
 	"github.com/gorilla/websocket"
 	"log"
-	"fmt"
+	"net/http"
 )
 
 func ChatHandler(clients *Clients) http.HandlerFunc {
@@ -31,7 +31,7 @@ func ChatHandler(clients *Clients) http.HandlerFunc {
 			if !clients.ExistConnection(clientConn) {
 				if IsStartMessage(p) {
 					str := fmt.Sprint(clientConn.address.String(), " joined to the chat")
-					clients.BroadcastMessage(messageType,[]byte(str))
+					clients.BroadcastMessage(messageType, []byte(str))
 					clients.AddConnection(clientConn)
 					clientConn.SendMessage(messageType, []byte("hello, you're in chat! type '/stop' to stop chatting"))
 				} else {
@@ -42,7 +42,7 @@ func ChatHandler(clients *Clients) http.HandlerFunc {
 					clients.DeleteConnection(clientConn)
 					clientConn.SendMessage(messageType, []byte("bye-bye! I'll miss u :("))
 					str := fmt.Sprint(clientConn.address.String(), " left the chat")
-					clients.BroadcastMessage(messageType,[]byte(str))
+					clients.BroadcastMessage(messageType, []byte(str))
 				} else {
 					clients.BroadcastMessage(messageType, p)
 				}
@@ -50,4 +50,3 @@ func ChatHandler(clients *Clients) http.HandlerFunc {
 		}
 	}
 }
-
