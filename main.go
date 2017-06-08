@@ -7,7 +7,16 @@ import (
 	"os"
 	"log"
 	"github.com/levgenia/websocket-chat/admin"
+	"strconv"
 )
+
+const (
+	portNum = 3000
+)
+
+func init() {
+	os.Setenv("PORT", strconv.Itoa(portNum))
+}
 
 func main() {
 	m := martini.Classic()
@@ -25,7 +34,7 @@ func main() {
 		return `<html><body><script src='//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>
     <ul id=messages></ul><form><input id=message><input type="submit" id=send value=Send></form>
     <script>
-    var c=new WebSocket('ws://localhost:3000/sock');
+    var c=new WebSocket('ws://localhost:` + strconv.Itoa(portNum) + `/sock');
     c.onopen = function(){
       c.onmessage = function(response){
         console.log(response.data);
