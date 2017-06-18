@@ -14,6 +14,7 @@ func ChatHandler(clients *Clients) http.HandlerFunc {
 			http.Error(w, "Not a web socket handshake", 400)
 			return
 		} else if err != nil {
+			// TODO: wrap err with more informative message
 			log.Println(err)
 			return
 		}
